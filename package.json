@@ -1,0 +1,14 @@
+{
+  "name": "pushing-it-website",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "cypress": "^13.6.4"
+  },
+  "scripts": {
+    "test": "cypress open"
+  },
+  "author": "",
+  "license": "ISC"
+}
