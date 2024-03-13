@@ -1,4 +1,4 @@
-import { pagepushinIt } from "../e2e/pagepushinIt"
+import { pagepushinIt } from "../../e2e/pagepushinIt"
 
 Cypress.Commands.add('login', (user,pass) => {
    

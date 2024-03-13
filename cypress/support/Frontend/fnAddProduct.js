@@ -1,5 +1,5 @@
 //* funcion para agregar un producto
-import { pagepushinIt } from '../e2e/pagepushinIt'
+import { pagepushinIt } from '../../e2e/pagepushinIt'
 Cypress.Commands.add('addproduct', (nameproduct, priceproduct, linkimageproduct, idproduct) => {
    cy.get(pagepushinIt.pageHome.moduleOnlineShop).click()
    cy.get(pagepushinIt.pageOnlineShop.addProductoButton).click()
