@@ -21,12 +21,7 @@ describe(`${scenarioName} - ${module} `, () => {
   let linkimageproduct = "https://www.e-paimun.com.ar/wp-content/uploads/2020/03/antiparra-Ruiz-1.jpg";
   let acces_token;
 
-  let body1 = {
-    name: nameproduct,
-    price: priceproduct,
-    img: linkimageproduct,
-    id: idproduct,
-  };
+  let body1 = { name: nameproduct, price: priceproduct, img: linkimageproduct, id: idproduct };
 
   let body2 = {
     name: "Patas de rana",
@@ -34,12 +29,10 @@ describe(`${scenarioName} - ${module} `, () => {
     img: "https://acdn.mitiendanube.com/stores/110/400/products/pata-de-rana-4881-146a75247df46f924f16771690656586-480-0.webp",
   };
 
-  before(() => {
+  beforeEach(() => {
     cy.iniciarSesion(datos.username, datos.password).then(({ token }) => {
       acces_token = token;
     });
-
-    // cy.crearProducto(acces_token, body1)
   });
 
   it(`Desafio 2 : el producto ${idproduct}`, () => {
@@ -57,6 +50,22 @@ describe(`${scenarioName} - ${module} `, () => {
       } else {
         cy.log("El producto existe hay que eliminarlo");
         cy.borrarProducto(acces_token, response.body.products.docs[0]._id);
+      }
+    });
+  });
+
+  it(`Desafio 2 : buscar y verificar si el producto ${idproduct} se modifico correctamente `, () => {
+    cy.login(datos.username, datos.password);
+
+    cy.searchproductmodify(idproduct).then((respuesta) => {
+      console.log(respuesta.response.body.products.docs[0]);
+      if (respuesta.response.body.products.docs.length == 0) {
+        console.log("el producto no existe");
+      } else {
+        expect(respuesta.response.body.products.docs[0].id).to.be.equal(parseInt(idproduct));
+        expect(respuesta.response.body.products.docs[0].img).to.be.equal(body2.img);
+        expect(respuesta.response.body.products.docs[0].name).to.be.equal(body2.name);
+        expect(respuesta.response.body.products.docs[0].price).to.be.equal(parseFloat(body2.price));
       }
     });
   });

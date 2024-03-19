@@ -14,13 +14,16 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import './commands'
-import './Frontend/fndatacy'
-import './Frontend/fnlogin'
-import './Frontend/fnAddProduct'
-import './Frontend/fnsSearchProduct'
-import './Frontend/fnDeleteProduct'
+import "./commands";
+import "./Frontend/fndatacy";
+import "./Frontend/fnlogin";
+import "./Frontend/fnAddProduct";
+import "./Frontend/fnsSearchProduct";
+import "./Frontend/fnDeleteProduct";
+import "./Frontend/fnSearchProductModify";
+import "./Frontend/fnAddProductList";
+import "./Frontend/fnCheckoutProduct";
 
-import './Backend/request/PushinItRequests'
+import "./Backend/request/PushinItRequests";
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
