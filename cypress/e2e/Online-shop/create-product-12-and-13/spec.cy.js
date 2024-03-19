@@ -3,7 +3,7 @@ const module = directorioName.split(/[/]/)[2];
 
 const nombreArchivo = directorioName.slice(directorioName.lastIndexOf("/") + 1);
 
-// Extraemos el nombre del escenario hasta el primer guion '-'
+// Extraemos el nombre del escenario hasta el primer guion '-
 const scenarioName = nombreArchivo.split("-").slice(0, 2).join("-");
 
 console.log(scenarioName);
