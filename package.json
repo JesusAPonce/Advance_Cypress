@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "cypress": "^13.6.4"
+    "cypress": "^13.6.4",
+    "pg": "^8.11.3"
   },
   "scripts": {
     "test": "cypress open"

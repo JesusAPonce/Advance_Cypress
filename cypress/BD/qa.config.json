@@ -1,0 +1,12 @@
+{
+  "env": {
+    "pushingItDB": {
+      "user": "pushingit",
+      "host": "dpg-cngrs0da73kc73c91170-a.oregon-postgres.render.com",
+      "database": "pushingit_j4z6",
+      "password": "E6gcqTtuRGliO02Wg3Gs8fqyQNK1fLjE",
+      "port": 5432,
+      "ssl": true
+    }
+  }
+}

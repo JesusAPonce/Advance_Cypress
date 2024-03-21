@@ -85,7 +85,36 @@ describe(`${scenarioName} - ${module} `, () => {
           cy.addproductlist(idproduct2);
           cy.get(pagepushinIt.pageOnlineShop.goshoopingcartButton).click();
           cy.get(pagepushinIt.pageShoopingCart.gocheckoutButton).click();
-          cy.checkoutproduct(body3);
+          cy.checkoutproduct(body3).then((payload) => {
+            console.log("resultado de intercept", payload);
+            console.log(payload.request.body.sellid);
+
+            cy.task("DATABASE2", {
+              dbConfig: Cypress.env("pushingItDB"),
+              queries: [
+                {
+                  label: "TablaSells",
+                  sql: `select pp.price,pp.product,pp.quantity,pp.total_price from "purchaseProducts" pp
+                  join sells s on pp.sell_id = s.id 
+                  where s.id = ${payload.request.body.sellid}`,
+                  values: [],
+                },
+
+                // Agrega más consultas según sea necesario
+              ],
+            }).then((results) => {
+              console.log(results.TablaSells);
+
+              let payloadproducts = payload.request.body.products;
+              payloadproducts.forEach((product) => {
+                product.price = parseFloat(product.price).toFixed(2);
+                product.total_price = parseFloat(product.total_price).toFixed(2);
+              });
+
+              console.log(payloadproducts);
+              expect(results.TablaSells).deep.eq(payloadproducts);
+            });
+          });
         }
       });
     });
