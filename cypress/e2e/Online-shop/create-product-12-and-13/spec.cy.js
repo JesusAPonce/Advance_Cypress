@@ -45,76 +45,70 @@ describe(`${scenarioName} - ${module} `, () => {
     });
   });
 
-  it(`Desafio 3 : creando los productos ${idproduct1} y  ${idproduct2}`, () => {
+  it.only(`Desafio 3 : creando los productos ${idproduct1} y  ${idproduct2}`, () => {
     console.log(acces_token);
     cy.log("Buscando producto");
+    // buscando el primer producto
     cy.buscarProducto(acces_token, idproduct1).then((response1) => {
+      // buscando el segundo prodcuto
       cy.buscarProducto(acces_token, idproduct2).then((response2) => {
         console.log(response1.body.products.docs);
         console.log(response2.body.products.docs);
+        // verifico si ambos productos existen
         if (response1.body.products.docs.length == 0 && response2.body.products.docs.length == 0) {
           cy.log("El producto no existe hay q crearlo");
           cy.crearProducto(acces_token, body1).then((response3) => {
             cy.crearProducto(acces_token, body2).then((response4) => {
               console.log(response3.body.product._id);
               console.log(response4.body.product._id);
+              cy.login(datos.username, datos.password);
+              cy.get(pagepushinIt.pageHome.moduleOnlineShop).click();
+              cy.searchproduct(idproduct1).then((resp1) => {
+                cy.addproductlist(idproduct1);
+                cy.searchproduct(idproduct2).then((resp2) => {
+                  cy.addproductlist(idproduct2);
+
+                  cy.get(pagepushinIt.pageOnlineShop.goshoopingcartButton).click();
+                  cy.get(pagepushinIt.pageShoopingCart.goBillingSummaryButton).click();
+                  cy.get(pagepushinIt.pageShoopingCart.gocheckoutButton).click();
+                  cy.checkoutproduct(body3).then((payload) => {
+                    console.log("resultado de intercept", payload);
+                    console.log(payload.request.body.sellid);
+
+                    cy.task("DATABASE2", {
+                      dbConfig: Cypress.env("pushingItDB"),
+                      queries: [
+                        {
+                          label: "TablaSells",
+                          sql: `select pp.price,pp.product,pp.quantity,pp.total_price from "purchaseProducts" pp
+                  join sells s on pp.sell_id = s.id 
+                  where s.id = ${payload.request.body.sellid}`,
+                          values: [],
+                        },
+
+                        // Agrega más consultas según sea necesario
+                      ],
+                    }).then((results) => {
+                      console.log(results.TablaSells);
+
+                      let payloadproducts = payload.request.body.products;
+                      payloadproducts.forEach((product) => {
+                        product.price = parseFloat(product.price).toFixed(2);
+                        product.total_price = parseFloat(product.total_price).toFixed(2);
+                      });
+
+                      console.log(payloadproducts);
+                      expect(results.TablaSells).deep.eq(payloadproducts);
+                    });
+                  });
+                });
+              });
             });
           });
         } else {
           cy.log("El producto existe hay que eliminarlo");
           cy.borrarProducto(acces_token, response1.body.products.docs[0]._id);
           cy.borrarProducto(acces_token, response2.body.products.docs[0]._id);
-        }
-      });
-    });
-  });
-
-  it(`Desafio 3 : ${idproduct1} ${idproduct2}`, () => {
-    cy.login(datos.username, datos.password);
-
-    cy.buscarProducto(acces_token, idproduct1).then((response1) => {
-      cy.buscarProducto(acces_token, idproduct2).then((response2) => {
-        console.log(response1.body.products.docs);
-        console.log(response2.body.products.docs);
-        if (response1.body.products.docs.length == 0 && response2.body.products.docs.length == 0) {
-          cy.log("El producto no existe ");
-        } else {
-          cy.get(pagepushinIt.pageHome.moduleOnlineShop).click();
-          cy.log("El producto existe ");
-          cy.addproductlist(idproduct1);
-          cy.addproductlist(idproduct2);
-          cy.get(pagepushinIt.pageOnlineShop.goshoopingcartButton).click();
-          cy.get(pagepushinIt.pageShoopingCart.gocheckoutButton).click();
-          cy.checkoutproduct(body3).then((payload) => {
-            console.log("resultado de intercept", payload);
-            console.log(payload.request.body.sellid);
-
-            cy.task("DATABASE2", {
-              dbConfig: Cypress.env("pushingItDB"),
-              queries: [
-                {
-                  label: "TablaSells",
-                  sql: `select pp.price,pp.product,pp.quantity,pp.total_price from "purchaseProducts" pp
-                  join sells s on pp.sell_id = s.id 
-                  where s.id = ${payload.request.body.sellid}`,
-                  values: [],
-                },
-
-                // Agrega más consultas según sea necesario
-              ],
-            }).then((results) => {
-              console.log(results.TablaSells);
-
-              let payloadproducts = payload.request.body.products;
-              payloadproducts.forEach((product) => {
-                product.price = parseFloat(product.price).toFixed(2);
-                product.total_price = parseFloat(product.total_price).toFixed(2);
-              });
-
-              console.log(payloadproducts);
-              expect(results.TablaSells).deep.eq(payloadproducts);
-            });
-          });
         }
       });
     });

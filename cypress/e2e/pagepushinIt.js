@@ -42,6 +42,7 @@ export const pagepushinIt = {
     goshoopingcartButton: '[data-cy="goShoppingCart"]',
   },
   pageShoopingCart: {
+    goBillingSummaryButton: '[data-cy="goBillingSummary"]',
     gocheckoutButton: '[data-cy="goCheckout"]',
   },
   pageCheckout: {
