@@ -45,7 +45,7 @@ describe(`${scenarioName} - ${module} `, () => {
     });
   });
 
-  it.only(`Desafio 3 : creando los productos ${idproduct1} y  ${idproduct2}`, () => {
+  it.only(`Desafio 3  y 4 : creando los productos ${idproduct1} y  ${idproduct2}`, () => {
     console.log(acces_token);
     cy.log("Buscando producto");
     // buscando el primer producto
@@ -67,8 +67,41 @@ describe(`${scenarioName} - ${module} `, () => {
                 cy.addproductlist(idproduct1);
                 cy.searchproduct(idproduct2).then((resp2) => {
                   cy.addproductlist(idproduct2);
-
                   cy.get(pagepushinIt.pageOnlineShop.goshoopingcartButton).click();
+                  let ObjectShoppingCart = [];
+                  // verificar que los productos agregado son lo mismo que aparecen en el carrito de compra
+                  cy.get('[role="list"]')
+                    .find("li")
+                    .each(($fila, index) => {
+                      const Quantity = $fila.find("p").eq(0).text();
+                      const Product = $fila.find("p").eq(1).text();
+                      const Price = $fila.find("p").eq(2).text();
+                      const Total = $fila.find("p").eq(3).text();
+                      console.log(Quantity, Product, Price);
+                      ObjectShoppingCart.push({ cantidad: Quantity, producto: Product, precio: Price, SubTotal: Total });
+                    })
+                    .then((resultado) => {
+                      console.log(ObjectShoppingCart);
+                      expect(ObjectShoppingCart[0].cantidad).to.equal("2");
+                      expect(ObjectShoppingCart[1].cantidad).to.equal("2");
+                      expect(ObjectShoppingCart[0].producto).to.equal(body1.name);
+                      expect(ObjectShoppingCart[1].producto).to.equal(body2.name);
+                      expect(ObjectShoppingCart[0].precio).to.equal(`$${body1.price}`);
+                      expect(ObjectShoppingCart[1].precio).to.equal(`$${body2.price}`);
+                      cy.get(".css-n1d5pa > .chakra-button").click();
+                      cy.get('[id="price"]')
+                        .invoke("text")
+                        .then((Totalprice) => {
+                          let Subtotal1 = ObjectShoppingCart[0].SubTotal.substring(1);
+                          let Subtotal2 = ObjectShoppingCart[1].SubTotal.substring(1);
+                          console.log(Subtotal1, Subtotal2);
+                          let SubTotalPrice = parseInt(Subtotal1) + parseInt(Subtotal2);
+                          console.log(SubTotalPrice);
+
+                          cy.verifyBillingsummary(SubTotalPrice.toFixed(2), Totalprice);
+                        });
+                    });
+                  // verificar el precio total mostrado sea igual a multimpliaccion entre cantidad y precio de cada producto
                   cy.get(pagepushinIt.pageShoopingCart.goBillingSummaryButton).click();
                   cy.get(pagepushinIt.pageShoopingCart.gocheckoutButton).click();
                   cy.checkoutproduct(body3).then((payload) => {

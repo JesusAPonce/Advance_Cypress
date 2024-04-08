@@ -6,8 +6,8 @@ Cypress.Commands.add("addproductlist", (idproduct) => {
   cy.get(pagepushinIt.pageOnlineShop.searchproductInput).clear();
 
   cy.get(pagepushinIt.pageOnlineShop.searchproductInput).type(idproduct).type("{enter}");
-  cy.get(pagepushinIt.pageOnlineShop.addtocartproductoButton.replace("productid", idproduct)).click();
+  cy.get(pagepushinIt.pageOnlineShop.addtocartproductoButton.replace("productid", idproduct)).click({ force: true });
   cy.get(pagepushinIt.pageOnlineShop.addtocartproductoDetails.closeButton).click();
-  cy.get(pagepushinIt.pageOnlineShop.addtocartproductoButton.replace("productid", idproduct)).click();
+  cy.get(pagepushinIt.pageOnlineShop.addtocartproductoButton.replace("productid", idproduct)).click({ force: true });
   cy.get(pagepushinIt.pageOnlineShop.addtocartproductoDetails.closeButton).click();
 });

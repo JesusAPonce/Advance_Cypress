@@ -23,7 +23,7 @@ import "./Frontend/fnDeleteProduct";
 import "./Frontend/fnSearchProductModify";
 import "./Frontend/fnAddProductList";
 import "./Frontend/fnCheckoutProduct";
-
+import "./Frontend/fnbillingsummary";
 import "./Backend/request/PushinItRequests";
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
