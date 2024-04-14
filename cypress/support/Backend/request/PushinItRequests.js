@@ -60,9 +60,10 @@ Cypress.Commands.add("buscarProducto", (acces_token, idproduct) => {
 //https://pushing-it.onrender.com/api/product/65f2005b01fa2f003413c3d7
 //_id
 
-Cypress.Commands.add("borrarProducto", (acces_token, idproduct) => {
+Cypress.Commands.add("eliminarProducto", (acces_token, idproduct) => {
+  // para buscar producto
   console.log(acces_token, idproduct);
-  const url1 = new URL(pagepushinIt.BaseUrl + pagepushinIt.deleteproduct.replace(":_id", idproduct));
+  const url1 = new URL(pagepushinIt.BaseUrl + pagepushinIt.searchproduct);
   const filter = new URLSearchParams(url1);
   idproduct && filter.append("id", idproduct);
   url1.search = filter.toString();
@@ -71,14 +72,27 @@ Cypress.Commands.add("borrarProducto", (acces_token, idproduct) => {
   console.log(pageUrl);
 
   cy.request({
-    method: "DELETE",
-    url: pageUrl,
+    method: "GET",
+    url: `${pageUrl}`,
+    failsOnStatusCode: false,
     headers: {
-      Authorization: "Bearer " + acces_token,
+      Authorization: `Bearer ${acces_token}`,
     },
-  }).then((response) => {
-    console.log(response);
-  });
+  })
+    .its("body.products.docs")
+    .each((product) => {
+      const url2 = new URL(pagepushinIt.BaseUrl + pagepushinIt.deleteproduct.replace(":_id", product._id));
+      const pageUrl2 = url2.href;
+      console.log(pageUrl2);
+      console.log();
+      cy.request({
+        method: "DELETE",
+        url: `${pageUrl2}`,
+        headers: {
+          Authorization: `Bearer ${acces_token}`,
+        },
+      });
+    });
 });
 
 Cypress.Commands.add("modificarProducto", (acces_token, idproduct, body2) => {

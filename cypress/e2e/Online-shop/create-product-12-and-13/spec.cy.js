@@ -6,13 +6,8 @@ const nombreArchivo = directorioName.slice(directorioName.lastIndexOf("/") + 1);
 // Extraemos el nombre del escenario hasta el primer guion '-
 const scenarioName = nombreArchivo.split("-").slice(0, 2).join("-");
 
-console.log(scenarioName);
 const testCaseId1 = directorioName.split(/[-]/)[3];
 const testCaseId2 = directorioName.split(/[-]/)[5];
-console.log(testCaseId1, testCaseId2);
-console.log(directorioName);
-console.log("🚀 ~ module:", module);
-console.log(scenarioName);
 
 import { datos } from "../../InfoGlobal";
 import { pagepushinIt } from "../../pagepushinIt";
@@ -46,103 +41,79 @@ describe(`${scenarioName} - ${module} `, () => {
   });
 
   it.only(`Desafio 3  y 4 : creando los productos ${idproduct1} y  ${idproduct2}`, () => {
-    console.log(acces_token);
-    cy.log("Buscando producto");
-    // buscando el primer producto
-    cy.buscarProducto(acces_token, idproduct1).then((response1) => {
-      // buscando el segundo prodcuto
-      cy.buscarProducto(acces_token, idproduct2).then((response2) => {
-        console.log(response1.body.products.docs);
-        console.log(response2.body.products.docs);
-        // verifico si ambos productos existen
-        if (response1.body.products.docs.length == 0 && response2.body.products.docs.length == 0) {
-          cy.log("El producto no existe hay q crearlo");
-          cy.crearProducto(acces_token, body1).then((response3) => {
-            cy.crearProducto(acces_token, body2).then((response4) => {
-              console.log(response3.body.product._id);
-              console.log(response4.body.product._id);
-              cy.login(datos.username, datos.password);
-              cy.get(pagepushinIt.pageHome.moduleOnlineShop).click();
-              cy.searchproduct(idproduct1).then((resp1) => {
-                cy.addproductlist(idproduct1);
-                cy.searchproduct(idproduct2).then((resp2) => {
-                  cy.addproductlist(idproduct2);
-                  cy.get(pagepushinIt.pageOnlineShop.goshoopingcartButton).click();
-                  let ObjectShoppingCart = [];
-                  // verificar que los productos agregado son lo mismo que aparecen en el carrito de compra
-                  cy.get('[role="list"]')
-                    .find("li")
-                    .each(($fila, index) => {
-                      const Quantity = $fila.find("p").eq(0).text();
-                      const Product = $fila.find("p").eq(1).text();
-                      const Price = $fila.find("p").eq(2).text();
-                      const Total = $fila.find("p").eq(3).text();
-                      console.log(Quantity, Product, Price);
-                      ObjectShoppingCart.push({ cantidad: Quantity, producto: Product, precio: Price, SubTotal: Total });
-                    })
-                    .then((resultado) => {
-                      console.log(ObjectShoppingCart);
-                      expect(ObjectShoppingCart[0].cantidad).to.equal("2");
-                      expect(ObjectShoppingCart[1].cantidad).to.equal("2");
-                      expect(ObjectShoppingCart[0].producto).to.equal(body1.name);
-                      expect(ObjectShoppingCart[1].producto).to.equal(body2.name);
-                      expect(ObjectShoppingCart[0].precio).to.equal(`$${body1.price}`);
-                      expect(ObjectShoppingCart[1].precio).to.equal(`$${body2.price}`);
-                      cy.get(".css-n1d5pa > .chakra-button").click();
-                      cy.get('[id="price"]')
-                        .invoke("text")
-                        .then((Totalprice) => {
-                          let Subtotal1 = ObjectShoppingCart[0].SubTotal.substring(1);
-                          let Subtotal2 = ObjectShoppingCart[1].SubTotal.substring(1);
-                          console.log(Subtotal1, Subtotal2);
-                          let SubTotalPrice = parseInt(Subtotal1) + parseInt(Subtotal2);
-                          console.log(SubTotalPrice);
+    // verifico si ambos productos existen si  es asi los elimino
+    cy.eliminarProducto(acces_token, idproduct1);
+    cy.eliminarProducto(acces_token, idproduct2);
 
-                          cy.verifyBillingsummary(SubTotalPrice.toFixed(2), Totalprice);
-                        });
-                    });
-                  // verificar el precio total mostrado sea igual a multimpliaccion entre cantidad y precio de cada producto
-                  cy.get(pagepushinIt.pageShoopingCart.goBillingSummaryButton).click();
-                  cy.get(pagepushinIt.pageShoopingCart.gocheckoutButton).click();
-                  cy.checkoutproduct(body3).then((payload) => {
-                    console.log("resultado de intercept", payload);
-                    console.log(payload.request.body.sellid);
+    cy.crearProducto(acces_token, body1).then((response3) => {
+      cy.crearProducto(acces_token, body2).then((response4) => {
+        cy.login(datos.username, datos.password);
+        cy.get(pagepushinIt.pageHome.moduleOnlineShop).click();
+        cy.searchproduct(idproduct1).then((resp1) => {
+          cy.addproductlist(idproduct1);
+          cy.searchproduct(idproduct2).then((resp2) => {
+            cy.addproductlist(idproduct2);
+            cy.get(pagepushinIt.pageOnlineShop.goshoopingcartButton).click();
+            let ObjectShoppingCart = [];
+            // verificar que los productos agregado son lo mismo que aparecen en el carrito de compra
+            cy.get('[role="list"]')
+              .find("li")
+              .each(($fila, index) => {
+                const Quantity = $fila.find("p").eq(0).text();
+                const Product = $fila.find("p").eq(1).text();
+                const Price = $fila.find("p").eq(2).text();
+                const Total = $fila.find("p").eq(3).text();
 
-                    cy.task("DATABASE2", {
-                      dbConfig: Cypress.env("pushingItDB"),
-                      queries: [
-                        {
-                          label: "TablaSells",
-                          sql: `select pp.price,pp.product,pp.quantity,pp.total_price from "purchaseProducts" pp
+                ObjectShoppingCart.push({ cantidad: Quantity, producto: Product, precio: Price, SubTotal: Total });
+              })
+              .then((resultado) => {
+                expect(ObjectShoppingCart[0].cantidad).to.equal("2");
+                expect(ObjectShoppingCart[1].cantidad).to.equal("2");
+                expect(ObjectShoppingCart[0].producto).to.equal(body1.name);
+                expect(ObjectShoppingCart[1].producto).to.equal(body2.name);
+                expect(ObjectShoppingCart[0].precio).to.equal(`$${body1.price}`);
+                expect(ObjectShoppingCart[1].precio).to.equal(`$${body2.price}`);
+                cy.get(".css-n1d5pa > .chakra-button").click();
+                cy.get('[id="price"]')
+                  .invoke("text")
+                  .then((Totalprice) => {
+                    let Subtotal1 = ObjectShoppingCart[0].SubTotal.substring(1);
+                    let Subtotal2 = ObjectShoppingCart[1].SubTotal.substring(1);
+
+                    let SubTotalPrice = parseInt(Subtotal1) + parseInt(Subtotal2);
+
+                    cy.verifyBillingsummary(SubTotalPrice.toFixed(2), Totalprice);
+                  });
+              });
+            // verificar el precio total mostrado sea igual a multimpliaccion entre cantidad y precio de cada producto
+            cy.get(pagepushinIt.pageShoopingCart.goBillingSummaryButton).click();
+            cy.get(pagepushinIt.pageShoopingCart.gocheckoutButton).click();
+            cy.checkoutproduct(body3).then((payload) => {
+              cy.task("DATABASE2", {
+                dbConfig: Cypress.env("pushingItDB"),
+                queries: [
+                  {
+                    label: "TablaSells",
+                    sql: `select pp.price,pp.product,pp.quantity,pp.total_price from "purchaseProducts" pp
                   join sells s on pp.sell_id = s.id 
                   where s.id = ${payload.request.body.sellid}`,
-                          values: [],
-                        },
+                    values: [],
+                  },
 
-                        // Agrega más consultas según sea necesario
-                      ],
-                    }).then((results) => {
-                      console.log(results.TablaSells);
-
-                      let payloadproducts = payload.request.body.products;
-                      payloadproducts.forEach((product) => {
-                        product.price = parseFloat(product.price).toFixed(2);
-                        product.total_price = parseFloat(product.total_price).toFixed(2);
-                      });
-
-                      console.log(payloadproducts);
-                      expect(results.TablaSells).deep.eq(payloadproducts);
-                    });
-                  });
+                  // Agrega más consultas según sea necesario
+                ],
+              }).then((results) => {
+                let payloadproducts = payload.request.body.products;
+                payloadproducts.forEach((product) => {
+                  product.price = parseFloat(product.price).toFixed(2);
+                  product.total_price = parseFloat(product.total_price).toFixed(2);
                 });
+
+                expect(results.TablaSells).deep.eq(payloadproducts);
               });
             });
           });
-        } else {
-          cy.log("El producto existe hay que eliminarlo");
-          cy.borrarProducto(acces_token, response1.body.products.docs[0]._id);
-          cy.borrarProducto(acces_token, response2.body.products.docs[0]._id);
-        }
+        });
       });
     });
   });
